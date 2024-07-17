@@ -200,11 +200,12 @@ $$
   - 【噪声图片 $x_1$】-【采样噪声$\epsilon_\theta$】= 【真实图片 $x_{0}$】
 
 
-https://github.com/chunyu-li/ddpm
 
 torchvision.datasets.CelebA
 
 https://nn.labml.ai/diffusion/stable_diffusion/model/unet.html
+https://github.com/chunyu-li/ddpm
+https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/simple_diffusion.py
 
 
 
