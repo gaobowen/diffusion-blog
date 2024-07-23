@@ -53,11 +53,16 @@ $$
 q(x_t|x_{t-1}) &:= \mathcal{N}(x_t;\sqrt{\alpha_t}x_{t-1},{1-\alpha_t}I) \tag{1} \\
 \end{align*}
 $$
-$$x_t=\sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_t}\varepsilon_t \\
-= \sqrt{\alpha_t \alpha_{t-1}\cdots \alpha_1} x_0 + (\sqrt{\alpha_t \alpha_{t-1}\cdots \alpha_2} \sqrt{1-\alpha_{1}}\varepsilon_1+ \cdots  +\sqrt{\alpha_t} \sqrt{1-\alpha_{t-1}}\varepsilon_{t-1} +\sqrt{1-\alpha_t}\varepsilon_t) \\
 $$
-又 $x_t \sim \mathcal{N}(0,I)$, 所以形式上等价于:  
-$$x_t=\sqrt{\alpha_t \alpha_{t-1}\cdots \alpha_1} x_0 + \sqrt{1-(\alpha_t \alpha_{t-1}\cdots \alpha_1)} \bar{\varepsilon}_0
+\begin{align*}
+  x_t&=\sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_t}\varepsilon_t \\
+&= \sqrt{\alpha_t}\left(\sqrt{\alpha_{t-1}}x_{t-2}+\sqrt{1-\alpha_{t-1}}\varepsilon_{t-1}\right)+\sqrt{1-\alpha_t}\varepsilon_t \\
+&=\sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \left[ \sqrt{\alpha_t-\alpha_t \alpha_{t-1}} \varepsilon_{t-1} + \sqrt{1-\alpha_t}\varepsilon_t \right] \\
+&=\sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1-(\alpha_t \alpha_{t-1})} \bar{\varepsilon}_{t-2} \\
+&=\cdots \\
+&=\sqrt{\alpha_t \alpha_{t-1}\cdots \alpha_1} x_0 + \sqrt{1-(\alpha_t \alpha_{t-1}\cdots \alpha_1)} \bar{\varepsilon}_0
+\end{align*}
+
 $$
 
 令 $\bar{\alpha}_t=\alpha_t \alpha_{t-1}\cdots \alpha_1=\prod_{i=1}^t \alpha_i$，有  
@@ -200,10 +205,14 @@ $$
   - 【噪声图片 $x_1$】-【采样噪声$\epsilon_\theta$】= 【真实图片 $x_{0}$】
 
 
+### 代码实现
+#### 超参数选择
+时间步 $T=1000$  
+令 $\bar{\beta_t}={1-\bar{\alpha}_t}= \prod \beta_t$  
+加噪过程，每次只加入少许噪声，加噪至最后图片已经接近纯噪声需要稍微加大噪声。  
+确定取值范围 $\beta_t \in [0.0001, 0.002]$  
 
-torchvision.datasets.CelebA
 
-https://nn.labml.ai/diffusion/stable_diffusion/model/unet.html
 https://github.com/chunyu-li/ddpm
 https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/simple_diffusion.py
 
