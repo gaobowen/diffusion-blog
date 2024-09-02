@@ -201,62 +201,14 @@ $$
 
 
 
-torchvision.datasets.CelebA
+参考代码
 
-https://nn.labml.ai/diffusion/stable_diffusion/model/unet.html
-https://github.com/chunyu-li/ddpm
-https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/simple_diffusion.py
-
-
-
+https://github.com/chunyu-li/ddpm  
+https://github.com/lucidrains/denoising-diffusion-pytorch
+ 
+参考文章
 
 
-
-
-
-
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-
-
-
-
-
-
-  
-
-
-  
-    
-  
-========================  
-https://blog.csdn.net/weixin_47748259/article/details/136737207 ⭐⭐
-
-https://blog.csdn.net/weixin_47748259/category_12591793.html ⭐⭐⭐
-
-https://qianyang-hfut.blog.csdn.net/article/details/86694325
-
-[A Tutorial on Variational Bayesian Inference](https://web-archive.southampton.ac.uk/www.orchid.ac.uk/eprints/40/1/fox_vbtut.pdf)
 
 
 [Denoising Diffusion Probabilistic Model](https://arxiv.org/pdf/2006.11239)
@@ -265,14 +217,9 @@ https://qianyang-hfut.blog.csdn.net/article/details/86694325
 
 [Understanding Diffusion Models: A Unified Perspective](https://arxiv.org/abs/2208.11970)
 
-============================  
 https://www.zhihu.com/people/ceng-yuan-16/posts
 
 [Understanding Diffusion Models: A Unified Perspective 阅读笔记](https://zhuanlan.zhihu.com/p/558937247)
-
-
-
-
 
 [Improved Denoising Diffusion Probabilistic Models](https://proceedings.mlr.press/v139/nichol21a/nichol21a.pdf)
 
