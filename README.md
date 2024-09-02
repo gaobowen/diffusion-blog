@@ -4,13 +4,17 @@
 
 ## 1- [DDPM](./DDPM.md)
 
+## 2- DDIM
 
-## 2 DDIM
+## 3- ClassifierGuided
 
-## 3 SDE 下的 DDPM
+## 4 SDE 下的 DDPM
 
-## 4 ODE 下的 DDIM
+## 5 ODE 下的 DDIM
 
-## 5 flow matching + 
+## 6 Flow Matching + Rectified Flow
 
-## 6 薛定谔桥与最优传输
+## 7 薛定谔桥与最优传输
+https://zhuanlan.zhihu.com/p/690392523
+https://zhuanlan.zhihu.com/p/681376756
+https://blog.csdn.net/CV_Autobot/article/details/139133212
