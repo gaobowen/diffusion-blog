@@ -85,7 +85,7 @@ $$P(X=x_i)=\sum_j p_{ij}$$
 $$P(Y=y_j)=\sum_i p_{ij}$$
 由联合分布可以推出边缘分布，但反之一般不可以，这是因为随机向量的分量之间可能有相关性。 
 
-![](https://img-blog.csdnimg.cn/20190213135628378.png) 
+![](./Preliminaries/0.png) 
 
 `绿色为联合分布，蓝色和红色分别为 X、Y 的边缘分布`
 
@@ -110,7 +110,7 @@ KL散度是两个概率分布$P$和$Q$差别的非对称性的度量。 KL散度
 KL散度的定义：  
 $KL(P||Q)=\sum p(x) log \dfrac{p(x)}{q(x)}$
 
-![](https://img-blog.csdn.net/20170225140215041?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvYXdzMzIxNzE1MA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![](./Preliminaries/1.png) 
 
 若$P$为已知的真实分布，$Q$为近似分布。
 (a). $KL(Q||P)$ (b). $KL(P||Q)$
@@ -120,7 +120,7 @@ $KL(P||Q)=\sum p(x) log \dfrac{p(x)}{q(x)}$
 ∪，而相反，凹函数则形如开口向下的帽 ∩。
 二阶导数在区间上大于等于零，就称为凸函数。例如，$y=x^2$
 
-![](https://upload.wikimedia.org/wikipedia/commons/4/4c/%E5%87%B8%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89.png)
+![](./Preliminaries/2.png) 
 
 概率论中, 有延森不等式: $f(E(X)) \leq E(f(X))$
 这里把 $E(X)$想象成$\dfrac{x_1+x_2}{2}$,则  
@@ -236,7 +236,7 @@ $$X-Y \sim \mathcal{N}(\mu_1-\mu_2, \sigma_1^2 + \sigma_2^2)$$
 （4）Marginalization: if p(x, z) is Gaussian, then p(x) is Gaussian.  
 （5）Conditioning: if p(x, z) is Gaussian, then p(x | z) is Gaussian.
 
-注：分布的等式两边不能移项
+注：分布的等式两边不能移项，重参数化后可以。
 
 ### 高斯分布的KL散度
 高斯分布 $X \sim \mathcal{N}(\mu, \sigma^{2}), p(x)=\dfrac{1}{\sqrt{2\pi\sigma^{2}}}\mathrm{exp}({-\dfrac{1}{2}(\dfrac{x-\mu}{\sigma})^{2}})$
