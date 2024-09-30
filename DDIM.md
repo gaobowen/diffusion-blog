@@ -106,9 +106,11 @@ $$
 x_{t-1} = \sqrt{\bar{\alpha}_{t-1}} \underbrace{\dfrac{x_t-\sqrt{1-\bar{\alpha}_t} \epsilon_\theta(x_t,t)}{\sqrt{\bar{\alpha}_{t}}}}_{预测的x_0}  + \underbrace{\sqrt{1-\bar{\alpha}_{t-1}-\sigma_t^2} \epsilon_\theta(x_t,t)}_{x_t的方向} + \underbrace{\sigma_t \varepsilon}_{随机噪声扰动} 
 $$
 
-当 $\sigma_t=\sqrt{\dfrac{(1-{\alpha}_{t})(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_{t}}}$ 时，前向过程为 Markovian ，采样过程变为 DDPM 。
+令 $\sigma_t=\eta \sqrt{\dfrac{(1-{\alpha}_{t})(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_{t}}}$
 
-当 $\sigma_t= 0$ 时，采样过程为确定过程，此时的模型 称为 隐概率模型(implicit probabilstic model)。
+当 $\eta =1$ 时，前向过程为 Markovian ，采样过程变为 DDPM 。
+
+当 $\eta =0$ 时，采样过程为确定过程，此时的模型 称为 隐概率模型(implicit probabilstic model)。
 
 DDIM如何加速采样：  
 在 DDPM 中，基于马尔可夫链 $t$ 与 $t-1$ 是相邻关系，例如 $t=100$ 则 $t-1=99$；  
@@ -116,8 +118,8 @@ DDIM如何加速采样：
 此时构建的采样子序列 $\tau=[\tau_i,\tau_{i-1},\cdots,\tau_{1}] \ll [t,t-1,\cdots,1]$ 。  
 例如，原序列 $\Tau=[100,99,98,\cdots,1]$，采样子序列为 $\tau=[100,90,80,\cdots,1]$ 。
 
-当 $\sigma_t= 0$ 时，DDIM 采样公式为：  
-$$ x_{\tau_{i-1}} = \dfrac{\sqrt{\bar{\alpha}_{\tau_{i-1}}}}{\sqrt{\bar{\alpha}_{\tau_{i}}}} x_{\tau_{i}} + \left( \sqrt{1-\bar{\alpha}_{\tau_{i-1}}} - \dfrac{\sqrt{\bar{\alpha}_{\tau_{i-1}}}\sqrt{1-\bar{\alpha}_{\tau_{i}}}}{\sqrt{\bar{\alpha}_{\tau_{i}}}} \right) \epsilon_\theta(x_{\tau_i},\tau_i)
+当 $\eta= 0$ 时，DDIM 采样公式为：  
+$$ x_{\tau_{i-1}} = \dfrac{\sqrt{\bar{\alpha}_{\tau_{i-1}}}}{\sqrt{\bar{\alpha}_{\tau_{i}}}} x_{\tau_{i}} + \left( \sqrt{1-\bar{\alpha}_{\tau_{i-1}}} - \dfrac{\sqrt{\bar{\alpha}_{\tau_{i-1}}}}{\sqrt{\bar{\alpha}_{\tau_{i}}}} \sqrt{1-\bar{\alpha}_{\tau_{i}}} \right) \epsilon_\theta(x_{\tau_i},\tau_i)
 $$
 
 ### 代码实现
