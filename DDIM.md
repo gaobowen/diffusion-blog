@@ -118,6 +118,12 @@ DDIM如何加速采样：
 此时构建的采样子序列 $\tau=[\tau_i,\tau_{i-1},\cdots,\tau_{1}] \ll [t,t-1,\cdots,1]$ 。  
 例如，原序列 $\Tau=[100,99,98,\cdots,1]$，采样子序列为 $\tau=[100,90,80,\cdots,1]$ 。
 
+DDIM 采样公式为：
+$$
+x_{\tau_{i-1}} = \sqrt{\bar{\alpha}_{\tau_{i-1}}} {\dfrac{x_{\tau_{i}}-\sqrt{1-\bar{\alpha}_{\tau_{i}}} \epsilon_\theta(x_{\tau_{i}},{\tau_{i}})}{\sqrt{\bar{\alpha}_{\tau_{i}}}}}  + {\sqrt{1-\bar{\alpha}_{\tau_{i-1}}-\sigma_{\tau_{i}}^2} \epsilon_\theta(x_{\tau_{i}},{\tau_{i}})} + {\sigma_{\tau_{i}} \varepsilon} 
+$$
+
+
 当 $\eta= 0$ 时，DDIM 采样公式为：  
 $$ x_{\tau_{i-1}} = \dfrac{\sqrt{\bar{\alpha}_{\tau_{i-1}}}}{\sqrt{\bar{\alpha}_{\tau_{i}}}} x_{\tau_{i}} + \left( \sqrt{1-\bar{\alpha}_{\tau_{i-1}}} - \dfrac{\sqrt{\bar{\alpha}_{\tau_{i-1}}}}{\sqrt{\bar{\alpha}_{\tau_{i}}}} \sqrt{1-\bar{\alpha}_{\tau_{i}}} \right) \epsilon_\theta(x_{\tau_i},\tau_i)
 $$
@@ -126,17 +132,90 @@ $$
 
 训练过程与 DDPM 一致，代码参考上一篇文章。采样代码如下：  
 
+```py
+device = 'cuda'
+torch.cuda.empty_cache()
+model = Unet().to(device)
+model.load_state_dict(torch.load('ddpm_T1000_l2_epochs_300.pth'))
+model.eval()
+
+image_size=96
+epochs = 500
+batch_size = 128
+T=1000
+betas = torch.linspace(0.0001, 0.02, T).to('cuda') # torch.Size([1000])
+
+# 每隔20采样一次
+tau_index = list(reversed(range(0, T, 20))) #[980, 960, ..., 20, 0]
+eta = 0.003
+
+# print(tau_index)
+
+# train
+alphas = 1 - betas # 0.9999 -> 0.98
+alphas_cumprod = torch.cumprod(alphas, axis=0) # 0.9999 -> 0.0000
+sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
+sqrt_one_minus_alphas_cumprod = torch.sqrt(1-alphas_cumprod)
+
+def get_val_by_index(val, t, x_shape):
+    batch_t = t.shape[0]
+    out = val.gather(-1, t)
+    return out.reshape(batch_t, *((1,) * (len(x_shape) - 1))) # torch.Size([batch_t, 1, 1, 1])
+
+def p_sample_ddim(model):
+    def step_denoise(model, x_tau_i, tau_i, tau_i_1):
+        sqrt_alphas_bar_tau_i = get_val_by_index(sqrt_alphas_cumprod, tau_i, x_tau_i.shape)
+        sqrt_alphas_bar_tau_i_1 = get_val_by_index(sqrt_alphas_cumprod, tau_i_1, x_tau_i.shape)
+
+        denoise = model(x_tau_i, tau_i)
+        
+        if eta == 0:
+            sqrt_1_minus_alphas_bar_tau_i = get_val_by_index(sqrt_one_minus_alphas_cumprod, tau_i, x_tau_i.shape)
+            sqrt_1_minus_alphas_bar_tau_i_1 = get_val_by_index(sqrt_one_minus_alphas_cumprod, tau_i_1, x_tau_i.shape)
+            x_tau_i_1 = sqrt_alphas_bar_tau_i_1 / sqrt_alphas_bar_tau_i * x_tau_i \
+                + (sqrt_1_minus_alphas_bar_tau_i_1 - sqrt_alphas_bar_tau_i_1 / sqrt_alphas_bar_tau_i * sqrt_1_minus_alphas_bar_tau_i) \
+                * denoise            
+            return x_tau_i_1
+
+        sigma = eta * torch.sqrt((1-get_val_by_index(alphas, tau_i, x_tau_i.shape)) * \
+        (1-get_val_by_index(sqrt_alphas_cumprod, tau_i_1, x_tau_i.shape)) / get_val_by_index(sqrt_one_minus_alphas_cumprod, tau_i, x_tau_i.shape))
+        
+        noise_z = torch.randn_like(x_tau_i, device=x_tau_i.device)
+        
+        # 整个式子由三部分组成
+        c1 = sqrt_alphas_bar_tau_i_1 / sqrt_alphas_bar_tau_i * (x_tau_i - get_val_by_index(sqrt_one_minus_alphas_cumprod, tau_i, x_tau_i.shape) * denoise)  
+        c2 = torch.sqrt(1 - get_val_by_index(alphas_cumprod, tau_i_1, x_tau_i.shape) - sigma) * denoise
+        c3 = sigma * noise_z
+        x_tau_i_1 = c1 + c2 + c3
+
+        return x_tau_i_1
+
+    
+    img_pred = torch.randn((4, 3, image_size, image_size), device=device)
+
+    for k in range(0, len(tau_index)):
+        # print(tau_index)
+        # 因为 tau_index 是倒序的，tau_i = k, tau_i_1 = k+1，这里不能弄反
+        tau_i_1 = torch.tensor([tau_index[k+1]], device=device, dtype=torch.long)
+        tau_i = torch.tensor([tau_index[k]], device=device, dtype=torch.long)
+        img_pred = step_denoise(model, img_pred, tau_i, tau_i_1)
+        
+        # if k % 20 == 0:
+        #     img_pred = torch.clamp(img_pred, -3.0, 3.0)
+        torch.cuda.empty_cache()
+        if tau_index[k+1] == 0: return img_pred
+
+    return img_pred
+
+with torch.no_grad():
+    img = p_sample_ddim(model)
+    img = torch.clamp(img, -1.0, 1.0)
+
+show_img_batch(img.detach().cpu())
+```
+![](./ddim/0.png)
 
 
-
-
-
-
-
-
-
-
-
-
-DDIM
-https://arxiv.org/pdf/2010.02502
+DDIM  
+https://arxiv.org/pdf/2010.02502  
+https://github.com/ermongroup/ddim  
