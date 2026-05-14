@@ -251,8 +251,9 @@ $\Sigma_{i,j} = cov(i,j) = \mathrm{E}[(X_i-\mu_i)(X_{j}-\mu_j)]$
 高斯分布的随机变量 线性组合 还是高斯分布:  
 （1）如果$X \sim \mathcal{N}(\mu, \sigma^2)$, a 与 b 是实数，那么$aX+b \sim \mathcal{N}(a\mu+b,(a\sigma)^2)$  
 （2）$X \sim \mathcal{N}(\mu_1, \sigma_1^2)$, $Y \sim \mathcal{N}(\mu_2, \sigma_2^2)$，$X,Y$是统计独立的随机变量，它们的和也服从高斯分布：  
-$$X+Y \sim \mathcal{N}(\mu_1+\mu_2, \sigma_1^2 + \sigma_2^2)$$  
-$$X-Y \sim \mathcal{N}(\mu_1-\mu_2, \sigma_1^2 + \sigma_2^2)$$
+$$X+Y \sim \mathcal{N}(\mu_1+\mu_2, \sigma_1^2 + \sigma_2^2)$$
+$$ {X-Y} \sim \mathcal{N}(\mu_1-\mu_2, \sigma_1^2 + \sigma_2^2)$$
+
 
 
 
