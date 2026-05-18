@@ -162,12 +162,62 @@ x_t = x_0 + t(x_1-x_0)
 $$
 这也说明了为什么训练时回归速度，采样时做 ODE 积分，两者在同一条逻辑链上是闭合的。
 
+### 伪代码
+
+训练伪代码（CFM / Rectified Flow，线性路径）：
+```py
+# model(x_t, t): predicts velocity field v_theta(x_t, t)
+# x1: real image batch from dataloader
+
+for x1 in dataloader:
+  # 1) sample noise and time
+  x0 = randn_like(x1)                  # x0 ~ N(0, I)
+  t = rand_uniform([B, 1, 1, 1])       # t in [0, 1]
+
+  # 2) construct linear interpolation path
+  x_t = (1 - t) * x0 + t * x1
+
+  # 3) conditional target velocity (for linear path)
+  target_v = x1 - x0
+
+  # 4) predict and optimize
+  pred_v = model(x_t, t)
+  loss = mse_loss(pred_v, target_v)
+
+```
+
+推理伪代码（欧拉法解 ODE）：
+```py
+# model(x_t, t): trained velocity model
+# N: number of sampling steps
+
+x = randn([B, C, H, W])   # x at t=0
+dt = 1.0 / N
+
+for i in range(N):
+  t = i / N
+  v = model(x, t)
+  x = x + dt * v         # Euler update: x_{t+dt} = x_t + dt * v_theta(x_t, t)
+
+x_gen = x                  # generated sample at t=1
+```
+
+
 
 ## 扩展阅读
 ### JiT模型
 
-[JiT：让去噪生成模型真正回归 "去噪"](https://zhuanlan.zhihu.com/p/1976481687618729389)  
-直接预测图像，loss还是用速度场。  
+[JiT：让去噪生成模型真正回归 "去噪"](https://zhuanlan.zhihu.com/p/1976481687618729389)
+
+假设现在是有 $d$ 维数据，以流形的形式分布在 $D(d<D)$ 维空间中。
+![](./FlowMatching/JiT-01.png)
+模型的 hidden dimension 是 256，当 $D=512$ 的时候，模型宽度不够了，对于 $\varepsilon, v $ 预测而言，都失败了。但是 $x$ 预测依旧有效。  
+对于不同的loss的FID：
+![](./FlowMatching/JiT-02.png)
+直接预测图像，loss还是用速度场比较好。
+![](./FlowMatching/JiT-03.png)
+对于 Patch 维度是 768，作者把 linear patch embedding 替换成一对先降维后升维的线性层。第一层把 hidden dimension 降维 ，第二层再把维度升为 hidden dimension。发现在网络中引入先降维后升维的 Bottleneck 不但不会损失性能，反而更有帮助。  
+作者认为，从表征学习的角度看，引入 Bottleneck 经常被用来促进学习低维表征。
 训练伪代码：
 ```
 # net(z, t): JiT network
@@ -196,13 +246,20 @@ z_next = z + (t_next - t) * v_pred
 ```
 ### RAE
 [Representation Autoencoder：语义丰富的预训练 Encoder + 训练 Decoder](https://zhuanlan.zhihu.com/p/1961439090462404696)  
-使用预训练的 Encoder (比如 DINOv2)，冻结参数，然后训练 Decoder。用这样得到的 Encoder + Decoder 替代 VAE，配合 Diffusion Model 完成图像生成任务。  
+使用预训练的 Encoder (比如 DINOv2)，冻结参数，然后训练 Decoder。用这样得到的 Encoder + Decoder 替代 VAE，配合 Diffusion Model 完成图像生成任务。
+![](./FlowMatching/RAE-01.png)
 其中 Decoder 的维度必须大于表征维度，这一点在JiT中也有体现。
 
 
 ###  Drifting Model (漂移模型)
 原生一步推理模型  
 [Drifting Model 漂移模型，一步生成式模型新范式](https://zhuanlan.zhihu.com/p/2004241203365946177)
+![](./FlowMatching/DriftModel-01.png)
+![](./FlowMatching/DriftModel-02.png)
+
+ - 用模型生成作为负样本，目标作为正样本，计算漂移场;
+ - 通过漂移场计算出漂移后的样本;
+ - 对当前样本与漂移后的样本做loss。
 
 训练：
 ```py
