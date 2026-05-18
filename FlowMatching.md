@@ -214,7 +214,7 @@ x_gen = x                  # generated sample at t=1
 模型的 hidden dimension 是 256，当 $D=512$ 的时候，模型宽度不够了，对于 $\varepsilon, v $ 预测而言，都失败了。但是 $x$ 预测依旧有效。  
 对于不同的loss的FID：
 ![](./FlowMatching/JiT-02.png)
-直接预测图像，loss还是用速度场比较好。
+结论：直接预测图像，loss还是用速度场比较好。
 ![](./FlowMatching/JiT-03.png)
 对于 Patch 维度是 768，作者把 linear patch embedding 替换成一对先降维后升维的线性层。第一层把 hidden dimension 降维 ，第二层再把维度升为 hidden dimension。发现在网络中引入先降维后升维的 Bottleneck 不但不会损失性能，反而更有帮助。  
 作者认为，从表征学习的角度看，引入 Bottleneck 经常被用来促进学习低维表征。
@@ -248,7 +248,7 @@ z_next = z + (t_next - t) * v_pred
 [Representation Autoencoder：语义丰富的预训练 Encoder + 训练 Decoder](https://zhuanlan.zhihu.com/p/1961439090462404696)  
 使用预训练的 Encoder (比如 DINOv2)，冻结参数，然后训练 Decoder。用这样得到的 Encoder + Decoder 替代 VAE，配合 Diffusion Model 完成图像生成任务。
 ![](./FlowMatching/RAE-01.png)
-- Decoder 的 token dimension 维度必须大于表征维度，这一点在JiT中也有类似体现。
+- Decoder 的 有效维度必须大于表征维度，这一点在JiT中也有类似体现。
 - timestep shifting schedule 应该与有效数据维度 (token number × token dimension) 相关。对于 schedule $t_n \in [0,1]$  ，shifted timestep 定义为：$ t_m = \dfrac{\alpha t_n}{1+(\alpha-1)t_n}, \alpha=\sqrt{m/n}$  。其中，$\alpha$ 是 dimension-dependent scaling factor。作者遵循 SD3 的做法，使用 $n=4096$ 作为基础维度，$m$ 为 RAE 的有效数据维度。
 
 
