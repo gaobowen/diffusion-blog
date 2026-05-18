@@ -248,7 +248,9 @@ z_next = z + (t_next - t) * v_pred
 [Representation Autoencoder：语义丰富的预训练 Encoder + 训练 Decoder](https://zhuanlan.zhihu.com/p/1961439090462404696)  
 使用预训练的 Encoder (比如 DINOv2)，冻结参数，然后训练 Decoder。用这样得到的 Encoder + Decoder 替代 VAE，配合 Diffusion Model 完成图像生成任务。
 ![](./FlowMatching/RAE-01.png)
-其中 Decoder 的维度必须大于表征维度，这一点在JiT中也有体现。
+- Decoder 的 token dimension 维度必须大于表征维度，这一点在JiT中也有类似体现。
+- timestep shifting schedule 应该与有效数据维度 (token number × token dimension) 相关。对于 schedule $t_n \in [0,1]$  ，shifted timestep 定义为：$ t_m = \dfrac{\alpha t_n}{1+(\alpha-1)t_n}, \alpha=\sqrt{m/n}$  。其中，$\alpha$ 是 dimension-dependent scaling factor。作者遵循 SD3 的做法，使用 $n=4096$ 作为基础维度，$m$ 为 RAE 的有效数据维度。
+
 
 
 ###  Drifting Model (漂移模型)
@@ -259,7 +261,7 @@ z_next = z + (t_next - t) * v_pred
 
  - 用模型生成作为负样本，目标作为正样本，计算漂移场;
  - 通过漂移场计算出漂移后的样本;
- - 对当前样本与漂移后的样本做loss。
+ - 对当前样本与漂移后的样本做loss。 
 
 训练：
 ```py
